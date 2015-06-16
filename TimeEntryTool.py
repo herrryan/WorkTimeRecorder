@@ -7,7 +7,6 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
-import sys
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -45,6 +44,7 @@ class Ui_baseWindow(object):
         self.comboBox.addItem(_fromUtf8(""))
         self.gridLayout.addWidget(self.comboBox, 1, 3, 1, 1)
         self.dateEdit = QtGui.QDateEdit(self.gridLayoutWidget_2)
+        self.dateEdit.setCalendarPopup(True)
         self.dateEdit.setObjectName(_fromUtf8("dateEdit"))
         self.gridLayout.addWidget(self.dateEdit, 1, 0, 1, 1)
         self.lineEdit = QtGui.QLineEdit(self.gridLayoutWidget_2)
@@ -92,11 +92,8 @@ class Ui_baseWindow(object):
         self.label_4.setText(_translate("baseWindow", "For Whom?", None))
         self.commandLinkButton.setText(_translate("baseWindow", "Export to WOKO Excel", None))
         self.pushButton.setText(_translate("baseWindow", "+ New Time Entry", None))
+        self.dateEdit.setDate(QtCore.QDate.currentDate())
+        self.dateEdit.setMinimumDate(QtCore.QDate.currentDate().addDays(-365))
+        self.dateEdit.setMaximumDate(QtCore.QDate.currentDate().addDays(365))
+        self.dateEdit.setDisplayFormat('dd.MM.yyyy')
 
-app = QtGui.QApplication(sys.argv)
-MainWindow = QtGui.QDialog()
-window = Ui_baseWindow()
-window.setupUi(MainWindow)
-MainWindow.show()
-
-sys.exit(app.exec_())
