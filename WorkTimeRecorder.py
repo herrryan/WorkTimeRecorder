@@ -11,6 +11,12 @@ from PyQt4 import QtCore, QtGui
 reload(sys)
 sys.setdefaultencoding('utf8')
 
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    def _fromUtf8(s):
+        return s
+
 headers = ['Date', 'Time (h)', 'Task', 'for whom? (mei62, Housing office, others)'];
 entry_list = [];
 class Entry:
@@ -30,8 +36,15 @@ class MainDialog(QtGui.QDialog, Ui_baseWindow):
     def __init__(self, parent=None):
         super(MainDialog, self).__init__(parent);
         self.setupUi(self);
+        # default
+        self.dateEdit.setDate(QtCore.QDate.currentDate());
+        self.dateEdit.setMinimumDate(QtCore.QDate.currentDate().addDays(-365));
+        self.dateEdit.setMaximumDate(QtCore.QDate.currentDate().addDays(365));
+        self.dateEdit.setDisplayFormat('dd.MM.yyyy');
+
         # controls
-        self.pushButton.clicked.connect(self.add_new_line_and_append_to_entry_list);
+        self.row = 1;
+        self.pushButton.clicked.connect(self.add_new_line_and_append_to_entry_list, self.row);
         self.get_date();
         self.dateEdit.dateChanged.connect(self.get_date);
         self.get_hours();
@@ -42,7 +55,9 @@ class MainDialog(QtGui.QDialog, Ui_baseWindow):
         self.comboBox.currentIndexChanged.connect(self.get_for_whom);
         #TODO: create entry and further create entry list for printing
         #create_time_entry(date, time, task, for_whom);
-    def add_new_line_and_append_to_entry_list(self):
+    def add_new_line_and_append_to_entry_list(self, row):
+        self.row += 1;
+        self.add_new_line(self.row);
         entry = [self.date, self.hours, self.task, self.for_whom];
         entry_list.append(entry);
         self.setup_workbook("stundenliste china-tutorin1", "July", entry_list);
@@ -60,6 +75,28 @@ class MainDialog(QtGui.QDialog, Ui_baseWindow):
     def get_for_whom(self):
         self.for_whom = str(self.comboBox.currentText());
         print "from %s" % self.comboBox.currentText();
+    
+    def add_new_line(self, row):
+        print "row number %s" % row
+        # TODO handle multiple with a list
+        self.comboBox = QtGui.QComboBox(self.gridLayoutWidget_2)
+        self.comboBox.setObjectName(_fromUtf8("comboBox"))
+        self.comboBox.addItem(_fromUtf8(""))
+        self.comboBox.addItem(_fromUtf8(""))
+        self.comboBox.addItem(_fromUtf8(""))
+        # the four number is [row, relative_position, component_height, component_width]
+        self.gridLayout.addWidget(self.comboBox, row, 3, 1, 1)
+        self.dateEdit = QtGui.QDateEdit(self.gridLayoutWidget_2)
+        self.dateEdit.setCalendarPopup(True)
+        self.dateEdit.setObjectName(_fromUtf8("dateEdit"))
+        self.gridLayout.addWidget(self.dateEdit, row, 0, 1, 1)
+        self.lineEdit = QtGui.QLineEdit(self.gridLayoutWidget_2)
+        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
+        self.lineEdit.setPlaceholderText("what have you done?")
+        self.gridLayout.addWidget(self.lineEdit, row, 2, 1, 1)
+        self.doubleSpinBox = QtGui.QDoubleSpinBox(self.gridLayoutWidget_2)
+        self.doubleSpinBox.setObjectName(_fromUtf8("doubleSpinBox"))
+        self.gridLayout.addWidget(self.doubleSpinBox, row, 1, 1, 1)
 
     def setup_default_layout(self, worksheet, entry):
         worksheet.cell('A3').value = 'WOKO Time recording';
